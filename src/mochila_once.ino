@@ -19,6 +19,9 @@
 #define PIN_BOTON_MATERIAL 32     // Botón para entrar en el modo "Meter Libros"
 #define PIN_BOTON_NAVEGACION 33   // Botón para entrar en el modo "Camino al Colegio"
 
+// Cambia a true si quieres reactivar los botones
+const bool BOTONES_HABILITADOS = false;
+
 // --- OBJETOS: Creamos a los "trabajadores" que manejarán los sensores ---
 MFRC522 lectorRFID(PIN_LECTOR_RFID_SS, PIN_LECTOR_RFID_RST); // Trabajador del lector
 Adafruit_VL53L0X laserIzquierdo = Adafruit_VL53L0X();        // Trabajador del láser izquierdo
@@ -32,8 +35,8 @@ enum EstadoDemo
   ESTADO_NAVEGACION // Guiando al niño al colegio (simulación)
 };
 
-// Empezamos siempre en estado de espera
-EstadoDemo estado = ESTADO_ESPERA;
+// Empezamos en modo material para probar sin botones
+EstadoDemo estado = ESTADO_MATERIAL;
 uint32_t temporizadorEstado = 0; // Reloj para contar los segundos en un estado
 uint32_t temporizadorRuta = 0;   // Reloj para saber cuándo dar la siguiente instrucción gps
 
@@ -75,9 +78,12 @@ void setup()
   pinMode(PIN_ULTRASONIDOS_TRIG_DER, OUTPUT);
   pinMode(PIN_ULTRASONIDOS_ECHO_DER, INPUT);
 
-  // Los botones tienen resistencia interna (PULLUP)
-  pinMode(PIN_BOTON_MATERIAL, INPUT_PULLUP);
-  pinMode(PIN_BOTON_NAVEGACION, INPUT_PULLUP);
+  if (BOTONES_HABILITADOS)
+  {
+    // Los botones tienen resistencia interna (PULLUP)
+    pinMode(PIN_BOTON_MATERIAL, INPUT_PULLUP);
+    pinMode(PIN_BOTON_NAVEGACION, INPUT_PULLUP);
+  }
 
   // Inicialización de los sensores Láser (Tienen que encenderse de uno en uno)
   digitalWrite(PIN_LASER_IZQUIERDO, LOW);
@@ -146,6 +152,13 @@ void tocarMelodiaExito()
   delay(140);
   tone(PIN_BOCINA, 1800, 120);
   delay(140);
+}
+
+// Tono prolongado de exito cuando ya esta todo el material
+void tocarExitoProlongado()
+{
+  tone(PIN_BOCINA, 1600, 700);
+  delay(720);
 }
 
 // Función para cambiar de estado de forma segura
@@ -227,11 +240,11 @@ void revisarLibros()
   // Comportamiento según acierto o error
   if (libroCorrecto)
   {
-    pitidoRapido(1200); // Pitido de acierto
+    pitidoRapido(1200); // Pitido de exito cuando toca el material
   }
   else
   {
-    tone(PIN_BOCINA, 400, 250); // Pitido grave y feo de "Este libro no toca hoy"
+    tone(PIN_BOCINA, 400, 250); // Tono grave de material incorrecto
   }
 
   lectorRFID.PICC_HaltA(); // Le decimos a la pegatina "ya te he leído, duérmete"
@@ -240,8 +253,8 @@ void revisarLibros()
   // Si las tres casillas están tachadas, lo tenemos todo
   if (librosEnMochila[0] && librosEnMochila[1] && librosEnMochila[2])
   {
-    tocarMelodiaExito();
-    cambiarModo(ESTADO_ESPERA); // Ya hemos acabado la tarea, a descansar
+    tocarExitoProlongado();
+    cambiarModo(ESTADO_NAVEGACION); // Pasamos a navegacion cuando ya esta todo
   }
 }
 
@@ -297,7 +310,10 @@ void simularRuta()
 // =========================================================================
 void loop()
 {
-  vigilarBotones(); // Estar constantemente atentos a los botones
+  if (BOTONES_HABILITADOS)
+  {
+    vigilarBotones(); // Estar constantemente atentos a los botones
+  }
 
   // --- ESCUDO ANTICHOQUES: Los láseres leen distancias de seguridad ---
   VL53L0X_RangingMeasurementData_t medidaIzq, medidaDer;

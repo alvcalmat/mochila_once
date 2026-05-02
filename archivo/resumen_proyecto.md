@@ -108,6 +108,22 @@ Los botones se conectan así:
 
 Este esquema es seguro y sencillo para prototipos y coincide con la configuración del código.
 
+#### Funcionamiento sin botones (modo demo)
+
+Si se prueban sin botones conectados, el comportamiento es este:
+
+- Al encender, la mochila entra directamente en **modo Material**.
+- Cada vez que se lee un material correcto, suena un **pitido corto de éxito**.
+- Si se lee un material que no toca, suena un **pitido grave de error**.
+- Cuando ya están todos los materiales, suena un **pitido prolongado de éxito** y se pasa a **modo Navegación**.
+- Al terminar la navegación, se pasa a **modo Espera**.
+
+**Significado de los pitidos en modo Material:**
+
+- **Pitido corto agudo (éxito):** material correcto.
+- **Pitido grave (error):** material incorrecto.
+- **Pitido prolongado (éxito final):** todos los materiales correctos y se inicia la navegación.
+
 ---
 
 ## Lista de Compra (Estimada)
