@@ -14,8 +14,6 @@
 #define PIN_LASER_DERECHO 17      // Pin para encender/apagar el láser derecho
 #define PIN_ULTRASONIDOS_TRIG_IZQ 4 // Pin que dispara el sonido (Trigger) del sensor izquierdo
 #define PIN_ULTRASONIDOS_ECHO_IZQ 2 // Pin que escucha el rebote (Echo) del sensor izquierdo
-
-// Para que el cableado no sea un lío, el ultrasonidos derecho usa pines contiguos en el mismo lateral
 #define PIN_ULTRASONIDOS_TRIG_DER 12 // Pin que dispara el sonido (Trigger) del sensor derecho
 #define PIN_ULTRASONIDOS_ECHO_DER 13 // Pin que escucha el rebote (Echo) del sensor derecho
 #define PIN_BOTON_MATERIAL 32     // Botón para entrar en el modo "Meter Libros"

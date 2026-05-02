@@ -91,6 +91,23 @@ Esta asignación coincide con el código y el pinout físico de la placa, facili
 * **Batería:** **Power Bank USB** estándar para alimentar la placa.
 * **Conexiones:** Cables jumper (Macho-Hembra, Hembra-Hembra) y Breadboard (placa de pruebas) para evitar soldaduras.
 
+#### Conexión de los botones (modo "Meter Libros" y "Camino al Colegio")
+
+Los botones se conectan así:
+
+| Botón                | Pin ESP32 (Wemos D1 R32) | Otro extremo del botón |
+|----------------------|--------------------------|-----------------------|
+| "Meter Libros"       | GPIO32                   | GND                   |
+| "Camino al Colegio"  | GPIO33                   | GND                   |
+
+**Notas:**
+- El código configura ambos pines como `INPUT_PULLUP`, por lo que **NO necesitas resistencia externa**.
+- Un extremo del botón va al pin correspondiente (32 o 33) y el otro extremo a **GND**.
+- Cuando el botón está pulsado, el pin se conecta a GND y lee `LOW` (0).
+- Cuando el botón está suelto, el pin se mantiene en `HIGH` (1) gracias a la resistencia interna del ESP32.
+
+Este esquema es seguro y sencillo para prototipos y coincide con la configuración del código.
+
 ---
 
 ## Lista de Compra (Estimada)
