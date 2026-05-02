@@ -18,9 +18,70 @@ Para mantener el coste bajo y el prototipo viable en un corto plazo de tiempo (2
 * **Sensores Láser ToF (Time-of-Flight):** 2x **VL53L0X**. Sensores pequeños y precisos (rango útil práctico hasta ~2 metros) que irán montados uno en cada hombro/correa.
 * **Sensor de Ultrasonidos:** **HC-SR04** (Opcional/Complementario según el código). Para distancias críticas muy cortas (< 30 cm).
 
+#### Conexión detallada de los sensores láser VL53L0X (ToF) al Wemos D1 R32 (ESP32)
+
+Ambos sensores VL53L0X comparten el bus I2C, pero cada uno tiene un pin de encendido (XSHUT) distinto para poder asignarles una dirección única al iniciar.
+
+| Pin VL53L0X | Función                | Pin ESP32 (Wemos D1 R32) | Ubicación física (header derecho) |
+|-------------|------------------------|--------------------------|-----------------------------------|
+| VIN         | Alimentación 3.3V/5V   | 3V3 o 5V                 | 3V3 o 5V                          |
+| GND         | Tierra                 | GND                      | GND                               |
+| SDA         | Datos I2C              | GPIO21                   | SDA (GPIO21)                      |
+| SCL         | Reloj I2C              | GPIO22                   | SCL (GPIO22)                      |
+| XSHUT IZQ   | Encendido láser izq.   | GPIO16                   | IO16                              |
+| XSHUT DER   | Encendido láser der.   | GPIO17                   | IO17                              |
+
+**Resumen de conexiones (cable a cable):**
+
+- VIN (de ambos sensores)  → 3V3 (o 5V)
+- GND (de ambos sensores)  → GND
+- SDA (de ambos sensores)  → GPIO21 (SDA)
+- SCL (de ambos sensores)  → GPIO22 (SCL)
+- XSHUT del láser izquierdo → IO16
+- XSHUT del láser derecho  → IO17
+
+**Notas:**
+- Los pines SDA y SCL se comparten entre ambos sensores (bus I2C).
+- Cada sensor debe tener su propio cable XSHUT para poder inicializarlos con direcciones distintas (ver código).
+- Puedes alimentar los VL53L0X con 3.3V o 5V, pero si usas el pin VIN, mejor 3.3V para evitar problemas de compatibilidad.
+
+Esta asignación coincide con el código y el pinout físico de la placa, facilitando el montaje con cables jumper.
+
 ### Sensores de Identificación (Material Escolar)
 * **Lector RFID:** **RC522 (13.56MHz)**. Módulo económico para leer etiquetas RFID a corta distancia (3-5 cm). 
 * **Etiquetas RFID:** Pegatinas pequeñas para adherir a cada libro y cuaderno. Se deslizarán por una zona específica de la mochila al guardarlos.
+
+#### Conexión detallada del lector RC522 (RFID) al Wemos D1 R32 (ESP32)
+
+El módulo RC522 tiene 8 pines. Así debes conectarlos:
+
+| Pin RC522 | Función                | Pin ESP32 (Wemos D1 R32) | Ubicación física (header derecho) |
+|-----------|------------------------|--------------------------|-----------------------------------|
+| SDA (SS)  | Slave Select (chip select) | GPIO5                   | IO5 (VSPI_SS)                     |
+| SCK       | SPI Clock              | GPIO18                   | IO18 (VSPI_SCK)                   |
+| MOSI      | SPI Master Out Slave In| GPIO23                   | IO23 (VSPI_MOSI)                  |
+| MISO      | SPI Master In Slave Out| GPIO19                   | IO19 (VSPI_MISO)                  |
+| IRQ       | Interrupción (no se usa)| —                        | —                                 |
+| GND       | Tierra                 | GND                      | GND                               |
+| RST       | Reset                  | GPIO14                   | IO14                              |
+| 3.3V      | Alimentación           | 3V3                      | 3V3                               |
+
+**Resumen de conexiones (cable a cable):**
+
+- SDA (SS)  → IO5
+- SCK       → IO18
+- MOSI      → IO23
+- MISO      → IO19
+- RST       → IO14
+- 3.3V      → 3V3
+- GND       → GND
+- IRQ       → (no conectar)
+
+**Notas:**
+- El pin IRQ del RC522 no se utiliza, déjalo sin conectar.
+- Usa siempre 3.3V para alimentar el RC522 (no 5V).
+
+Esta asignación coincide con el código y el pinout físico de la placa, facilitando el montaje con cables jumper.
 
 ### Actuadores (Feedback al Usuario)
 * **Feedback Háptico:** 2x **Módulos de motor de vibración** tipo moneda (Coin Vibration Motor, 3V). Se colocarán en las correas de los hombros para indicar de qué lado está el obstáculo.
