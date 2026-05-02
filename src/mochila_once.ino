@@ -12,8 +12,10 @@
 #define PIN_VIBRADOR_DERECHO 27   // Pin del motor que vibra en el hombro derecho
 #define PIN_LASER_IZQUIERDO 16    // Pin para encender/apagar el láser izquierdo
 #define PIN_LASER_DERECHO 17      // Pin para encender/apagar el láser derecho
-#define PIN_ULTRASONIDOS_TRIG 4   // Pin que dispara el sonido (Trigger)
-#define PIN_ULTRASONIDOS_ECHO 2   // Pin que escucha el rebote (Echo)
+#define PIN_ULTRASONIDOS_TRIG_IZQ 4  // Pin que dispara el sonido (Trigger) del sensor izquierdo
+#define PIN_ULTRASONIDOS_ECHO_IZQ 2  // Pin que escucha el rebote (Echo) del sensor izquierdo
+#define PIN_ULTRASONIDOS_TRIG_DER 15 // Pin que dispara el sonido (Trigger) del sensor derecho
+#define PIN_ULTRASONIDOS_ECHO_DER 13 // Pin que escucha el rebote (Echo) del sensor derecho
 #define PIN_BOTON_MATERIAL 32     // Botón para entrar en el modo "Meter Libros"
 #define PIN_BOTON_NAVEGACION 33   // Botón para entrar en el modo "Camino al Colegio"
 
@@ -64,8 +66,10 @@ void setup()
   pinMode(PIN_VIBRADOR_DERECHO, OUTPUT);
   pinMode(PIN_LASER_IZQUIERDO, OUTPUT);
   pinMode(PIN_LASER_DERECHO, OUTPUT);
-  pinMode(PIN_ULTRASONIDOS_TRIG, OUTPUT);
-  pinMode(PIN_ULTRASONIDOS_ECHO, INPUT);
+  pinMode(PIN_ULTRASONIDOS_TRIG_IZQ, OUTPUT);
+  pinMode(PIN_ULTRASONIDOS_ECHO_IZQ, INPUT);
+  pinMode(PIN_ULTRASONIDOS_TRIG_DER, OUTPUT);
+  pinMode(PIN_ULTRASONIDOS_ECHO_DER, INPUT);
 
   // Los botones tienen resistencia interna (PULLUP)
   pinMode(PIN_BOTON_MATERIAL, INPUT_PULLUP);
@@ -89,16 +93,16 @@ void setup()
 }
 
 // Función que lee la distancia del ultrasonidos frontal
-long leerUltrasonido()
+long leerUltrasonido(uint8_t pinTrig, uint8_t pinEcho)
 {
-  digitalWrite(PIN_ULTRASONIDOS_TRIG, LOW);
+  digitalWrite(pinTrig, LOW);
   delayMicroseconds(2);
-  digitalWrite(PIN_ULTRASONIDOS_TRIG, HIGH);
+  digitalWrite(pinTrig, HIGH);
   delayMicroseconds(10); // Disparo de sonido de 10 microsegundos
-  digitalWrite(PIN_ULTRASONIDOS_TRIG, LOW);
+  digitalWrite(pinTrig, LOW);
 
   // Contamos cuánto tarda en volver el eco y lo pasamos a centímetros
-  return pulseIn(PIN_ULTRASONIDOS_ECHO, HIGH) * 0.034 / 2;
+  return pulseIn(pinEcho, HIGH) * 0.034 / 2;
 }
 
 // Función que comprueba si dos códigos de pegatina son iguales
@@ -300,24 +304,32 @@ void loop()
   bool cuidadoIzquierda = (medidaIzq.RangeStatus != 4 && medidaIzq.RangeMilliMeter < 1200);
   bool cuidadoDerecha = (medidaDer.RangeStatus != 4 && medidaDer.RangeMilliMeter < 1200);
 
-  // Leemos distancia cortísima frontal
-  long distanciaUltra = leerUltrasonido();
-  // Hay coche/persona cruzada a menos de 30 cm de la cara
-  bool peligroChoqueMuro = (distanciaUltra > 0 && distanciaUltra < 30);
+  // Leemos distancia cortísima en ambos hombros (izquierdo y derecho)
+  long distanciaUltraIzq = leerUltrasonido(PIN_ULTRASONIDOS_TRIG_IZQ, PIN_ULTRASONIDOS_ECHO_IZQ);
+  long distanciaUltraDer = leerUltrasonido(PIN_ULTRASONIDOS_TRIG_DER, PIN_ULTRASONIDOS_ECHO_DER);
+  // Hay coche/persona muy cerca a menos de 30 cm en cada lado
+  bool peligroIzquierda = (distanciaUltraIzq > 0 && distanciaUltraIzq < 30);
+  bool peligroDerecha = (distanciaUltraDer > 0 && distanciaUltraDer < 30);
 
   // Reacciones físicas a los choques
-  if (peligroChoqueMuro)
+  if (peligroIzquierda || peligroDerecha)
   {
-    // Frena! (Ambos vibran a tope a la vez y la bocina chilla como loca)
-    digitalWrite(PIN_VIBRADOR_IZQUIERDO, HIGH);
-    digitalWrite(PIN_VIBRADOR_DERECHO, HIGH);
-    tone(PIN_BOCINA, 2000, 60);
+    // Peligro cercano (ultrasonidos): vibra el lado que detecta y la bocina avisa fuerte
+    digitalWrite(PIN_VIBRADOR_IZQUIERDO, peligroIzquierda ? HIGH : LOW);
+    digitalWrite(PIN_VIBRADOR_DERECHO, peligroDerecha ? HIGH : LOW);
+    tone(PIN_BOCINA, 2000, 60); // Tono agudo = "Peligro"
   }
   else
   {
-    // Si no hay emergencia, que vibre levemente el hombro del lado que tiene pared cerca
+    // Si no hay emergencia, que vibre levemente el hombro del lado que tiene pared cerca (laser)
     digitalWrite(PIN_VIBRADOR_IZQUIERDO, cuidadoIzquierda ? HIGH : LOW);
     digitalWrite(PIN_VIBRADOR_DERECHO, cuidadoDerecha ? HIGH : LOW);
+
+    // Aviso suave de advertencia cuando el laser detecta algo a media distancia
+    if (cuidadoIzquierda || cuidadoDerecha)
+    {
+      tone(PIN_BOCINA, 1000, 40); // Tono medio = "Advertencia"
+    }
   }
 
   // --- LAS DOS TAREAS POSIBLES ---
