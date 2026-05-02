@@ -105,3 +105,55 @@ En modo ruta, la mochila simula que está dando instrucciones GPS con retardos d
   Sin importar la instrucción actual de navegación, los sensores siempre están activos:
   * Si alguien se acerca desde la izquierda (< 60cm), el hombro izquierdo oscila suavemente.
   * Si alguien frena bruscamente delante (obstáculo crítico), vibran ambos de golpe indicando la alerta física de colisión que "pisa" a las instrucciones de la ruta.
+
+## Descripción de los pines de la placa Wemos D1 R32 ESP32
+
+Aquí tienes el archivo JSON con la descripción detallada de los pines de la placa Wemos D1 R32 ESP32, organizado por su ubicación física según la imagen:
+
+```json
+{
+    "board": "Wemos D1 R32 ESP32",
+    "pin_layout": {
+        "left_side_power": [
+            {"label": "IO0", "function": "GPIO0"},
+            {"label": "5V", "function": "Power 5V"},
+            {"label": "RST", "function": "Reset"},
+            {"label": "3V3", "function": "Power 3.3V"},
+            {"label": "5V", "function": "Power 5V"},
+            {"label": "GND", "function": "Ground"},
+            {"label": "GND", "function": "Ground"},
+            {"label": "VN", "function": "Sensor VP (GPIO36)"}
+        ],
+        "analog_header_left": [
+            {"label": "IO2", "functions": ["GPIO2", "ADC12", "TOUCH2"]},
+            {"label": "IO4", "functions": ["GPIO4", "ADC10", "TOUCH0"]},
+            {"label": "IO35", "functions": ["GPIO35", "ADC7"]},
+            {"label": "IO34", "functions": ["GPIO34", "ADC6"]},
+            {"label": "IO36", "functions": ["GPIO36", "ADC0"]},
+            {"label": "IO39", "functions": ["GPIO39", "ADC3"]}
+        ],
+        "right_side_top": [
+            {"label": "SCL", "function": "GPIO22 / SCL"},
+            {"label": "SDA", "function": "GPIO21 / SDA"},
+            {"label": "RST", "function": "Reset"},
+            {"label": "GND", "function": "Ground"}
+        ],
+        "digital_header_right": [
+            {"label": "IO18", "functions": ["GPIO18", "VSPI_SCK"]},
+            {"label": "IO19", "functions": ["GPIO19", "VSPI_MISO"]},
+            {"label": "IO23", "functions": ["GPIO23", "VSPI_MOSI"]},
+            {"label": "IO5", "functions": ["GPIO5", "VSPI_SS"]},
+            {"label": "IO13", "functions": ["GPIO13", "ADC14", "TOUCH4"]},
+            {"label": "IO12", "functions": ["GPIO12", "ADC15", "TOUCH5"]},
+            {"label": "IO14", "functions": ["GPIO14", "ADC16", "TOUCH6"]},
+            {"label": "IO27", "functions": ["GPIO27", "ADC17", "TOUCH7"]},
+            {"label": "IO16", "functions": ["GPIO16", "RX2"]},
+            {"label": "IO17", "functions": ["GPIO17", "TX2"]},
+            {"label": "IO25", "functions": ["GPIO25", "ADC18", "DAC1"]},
+            {"label": "IO26", "functions": ["GPIO26", "ADC19", "DAC2"]},
+            {"label": "TX0", "functions": ["GPIO1", "TX0"]},
+            {"label": "RX0", "functions": ["GPIO3", "RX0"]}
+        ]
+    }
+}
+```

@@ -3,7 +3,7 @@
 
 // Pins aligned with mochila_once.ino
 #define PIN_RFID_SS  5
-#define PIN_RFID_RST 22
+#define PIN_RFID_RST 14
 
 MFRC522 rfid(PIN_RFID_SS, PIN_RFID_RST);
 

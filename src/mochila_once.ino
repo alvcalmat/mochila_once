@@ -5,16 +5,18 @@
 #include "Adafruit_VL53L0X.h" // Librería específica para los medidores de distancia láser
 
 // --- PINES: Dónde va conectado cada cable en la placa ---
-#define PIN_LECTOR_RFID_SS 5      // Pin selector del lector de libros
-#define PIN_LECTOR_RFID_RST 22    // Pin para reiniciar el lector de libros
+#define PIN_LECTOR_RFID_SS 5   // Pin selector del lector de libros (va junto al resto de pines SPI)
+#define PIN_LECTOR_RFID_RST 14 // Pin para reiniciar el lector de libros (IMPORTANTE: NO usar 21/22 porque son del I2C de los láser)
 #define PIN_BOCINA 25             // Pin para el zumbador/altavoz (emite pitidos)
 #define PIN_VIBRADOR_IZQUIERDO 26 // Pin del motor que vibra en el hombro izquierdo
 #define PIN_VIBRADOR_DERECHO 27   // Pin del motor que vibra en el hombro derecho
 #define PIN_LASER_IZQUIERDO 16    // Pin para encender/apagar el láser izquierdo
 #define PIN_LASER_DERECHO 17      // Pin para encender/apagar el láser derecho
-#define PIN_ULTRASONIDOS_TRIG_IZQ 4  // Pin que dispara el sonido (Trigger) del sensor izquierdo
-#define PIN_ULTRASONIDOS_ECHO_IZQ 2  // Pin que escucha el rebote (Echo) del sensor izquierdo
-#define PIN_ULTRASONIDOS_TRIG_DER 15 // Pin que dispara el sonido (Trigger) del sensor derecho
+#define PIN_ULTRASONIDOS_TRIG_IZQ 4 // Pin que dispara el sonido (Trigger) del sensor izquierdo
+#define PIN_ULTRASONIDOS_ECHO_IZQ 2 // Pin que escucha el rebote (Echo) del sensor izquierdo
+
+// Para que el cableado no sea un lío, el ultrasonidos derecho usa pines contiguos en el mismo lateral
+#define PIN_ULTRASONIDOS_TRIG_DER 12 // Pin que dispara el sonido (Trigger) del sensor derecho
 #define PIN_ULTRASONIDOS_ECHO_DER 13 // Pin que escucha el rebote (Echo) del sensor derecho
 #define PIN_BOTON_MATERIAL 32     // Botón para entrar en el modo "Meter Libros"
 #define PIN_BOTON_NAVEGACION 33   // Botón para entrar en el modo "Camino al Colegio"
@@ -56,8 +58,12 @@ uint32_t tiempoUltimoBoton = 0; // Para lo que llamamos "debounce" (evitar rebot
 // =========================================================================
 void setup()
 {
-  Serial.begin(115200);  // Iniciamos la pantalla del ordenador para ver mensajes
-  SPI.begin();           // Encendemos la comunicación con el lector
+  Serial.begin(115200); // Iniciamos la pantalla del ordenador para ver mensajes
+
+  // 1) Encendemos los "idiomas" de comunicación:
+  Wire.begin(); // I2C (por defecto en ESP32: SDA=21 y SCL=22). Se usa para los sensores láser.
+  SPI.begin();  // SPI (por defecto en ESP32: SCK=18, MISO=19, MOSI=23, SS=5). Se usa para el RFID.
+
   lectorRFID.PCD_Init(); // Despertamos al lector de libros
 
   // Decimos a la placa quién es salida (enviar electricidad) y quién entrada (recibir)
@@ -92,7 +98,7 @@ void setup()
   temporizadorEstado = millis();
 }
 
-// Función que lee la distancia del ultrasonidos frontal
+// Función que lee la distancia de UN sensor de ultrasonidos (vale para el izquierdo o el derecho)
 long leerUltrasonido(uint8_t pinTrig, uint8_t pinEcho)
 {
   digitalWrite(pinTrig, LOW);
